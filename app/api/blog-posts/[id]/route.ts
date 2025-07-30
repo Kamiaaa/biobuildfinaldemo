@@ -1,25 +1,36 @@
-//app/api/blog-posts/[id]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import connectMongo from '@/lib/mongoose';
 import BlogPost from '@/models/BlogPost';
 
-// export async function GET(_: NextRequest, context: { params: { id: string } }) {
-//   await connectMongo();
-//   const { id } = await context.params;
-//   const post = await BlogPost.findById(id);
-//   if (!post) {
-//     return NextResponse.json({ message: 'Not found' }, { status: 404 });
-//   }
-//   return NextResponse.json(post);
-// }
-
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectMongo();
-    const { id } = await context.params;
+    const post = await BlogPost.findById(params.id);
+    if (!post) {
+      return NextResponse.json({ message: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json(post);
+  } catch (error) {
+    console.error('GET error:', error);
+    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await connectMongo();
     const data = await req.json();
-    const updatedPost = await BlogPost.findByIdAndUpdate(id, data, {
+    
+    if (!data || typeof data !== 'object') {
+      return NextResponse.json({ message: 'Invalid data' }, { status: 400 });
+    }
+
+    const existingPost = await BlogPost.findById(params.id);
+    if (!existingPost) {
+      return NextResponse.json({ message: 'Not found' }, { status: 404 });
+    }
+
+    const updatedPost = await BlogPost.findByIdAndUpdate(params.id, data, {
       new: true,
     });
     return NextResponse.json(updatedPost);
@@ -29,12 +40,14 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
   }
 }
 
-export async function DELETE(_: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectMongo();
-    const { id } = await context.params;
-    await BlogPost.findByIdAndDelete(id);
-    return NextResponse.json({ message: 'Deleted' });
+    const deletedPost = await BlogPost.findByIdAndDelete(params.id);
+    if (!deletedPost) {
+      return NextResponse.json({ message: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json({ message: 'Deleted successfully' });
   } catch (error) {
     console.error('DELETE error:', error);
     return NextResponse.json({ message: 'Failed to delete post' }, { status: 500 });
