@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectMongo from '@/lib/mongoose';
 import BlogPost from '@/models/BlogPost';
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  _: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectMongo();
     const post = await BlogPost.findById(params.id);
@@ -16,7 +19,10 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectMongo();
     const data = await req.json();
@@ -40,7 +46,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectMongo();
     const deletedPost = await BlogPost.findByIdAndDelete(params.id);
