@@ -5,9 +5,13 @@ import connectMongo from '@/lib/mongoose';
 import BlogPost from '@/models/BlogPost';
 
 // GET single blog post
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   await connectMongo();
-  const { id } = params;
+  const { id } = context.params;
+
   const post = await BlogPost.findById(id);
   if (!post) {
     return NextResponse.json({ message: 'Not found' }, { status: 404 });
@@ -15,12 +19,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json(post);
 }
 
-// UPDATE blog post
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+// PUT (update blog post)
+export async function PUT(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     await connectMongo();
-    const { id } = params;
-    const data = await req.json();
+    const { id } = context.params;
+    const data = await request.json();
     const updatedPost = await BlogPost.findByIdAndUpdate(id, data, { new: true });
     return NextResponse.json(updatedPost);
   } catch (error) {
@@ -29,11 +36,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-// DELETE blog post
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+// DELETE (delete blog post)
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     await connectMongo();
-    const { id } = params;
+    const { id } = context.params;
     await BlogPost.findByIdAndDelete(id);
     return NextResponse.json({ message: 'Deleted' });
   } catch (error) {
